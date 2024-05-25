@@ -1,4 +1,4 @@
 .idea
 .vscode
 __pycache__
-/mqtt_mini/config.py
+/mqtt_mini/configNew.py

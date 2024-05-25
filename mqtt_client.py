@@ -5,7 +5,7 @@ import struct
 
 import paho.mqtt.client as mqtt
 
-from mqtt_mini.config import *
+from mqtt_mini.configNew import *
 
 
 def on_subscribe(client, userdata, mid, reason_code_list, properties):
@@ -69,7 +69,7 @@ def process_message(message, message_length):
     try:
         decoded = json.loads(message.payload.decode())
         data = decoded["data"]
-        pkg_count = decoded["cnt"]
+        #pkg_count = decoded["cnt"]
         data_bytes = bytes(data)
         print(data_bytes.hex(sep=" "))
         if len(data_bytes) != message_length:
@@ -80,16 +80,17 @@ def process_message(message, message_length):
     except KeyError:
         print(f"ERROR: Could find data field in message")
     else:
-        print(f"Got message on topic {topic_str} ({pkg_count}) at {recv_timestamp}:")
+        print(f"Got message on topic {topic_str} at {recv_timestamp}:")
         make_dict(data_bytes)
 
 
 if __name__ == "__main__":
 
     # this is required since e-technik server uses self-signed certificates
-    ssl_context = ssl.create_default_context()
-    ssl_context.check_hostname = False
-    ssl_context.verify_mode = ssl.CERT_NONE
+    if use_ssl:
+        ssl_context = ssl.create_default_context()
+        ssl_context.check_hostname = False
+        ssl_context.verify_mode = ssl.CERT_NONE
 
     # create the client
     mqttc = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
@@ -99,8 +100,10 @@ if __name__ == "__main__":
     mqttc.on_unsubscribe = on_unsubscribe
 
     mqttc.username_pw_set(username=mqtt_username, password=mqtt_password)
-    mqttc.tls_set_context(ssl_context)
-    mqttc.tls_insecure_set(True)
+
+    if use_ssl:
+        mqttc.tls_set_context(ssl_context)
+        mqttc.tls_insecure_set(True)
 
     # we store our topic and our message handler function as user data in the client
     mqttc.user_data_set({
