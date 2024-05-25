@@ -5,7 +5,7 @@ import struct
 
 import paho.mqtt.client as mqtt
 
-from mqtt_mini.configNew import *
+from mqtt_mini.config import *
 
 
 def on_subscribe(client, userdata, mid, reason_code_list, properties):
